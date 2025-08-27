@@ -186,23 +186,104 @@ Extract and upload to test the full analysis pipeline.
 
 ## 🚀 Deployment
 
-### Render Deployment
+### 🐳 Docker Deployment (Recommended)
+
+#### Option 1: Docker Compose (Easiest)
+```bash
+# Clone and run with Docker Compose
+git clone https://github.com/frenzy2004/Brain-2.git
+cd Brain-2
+docker-compose up --build
+```
+
+#### Option 2: Manual Docker Build
+```bash
+# Build the Docker image
+docker build -t neurograde-pro .
+
+# Run the container
+docker run -p 8501:8501 neurograde-pro
+```
+
+#### Option 3: Pull from Docker Hub (when available)
+```bash
+# Pull pre-built image
+docker pull frenzy2004/neurograde-pro:latest
+docker run -p 8501:8501 frenzy2004/neurograde-pro:latest
+```
+
+### 🌐 Render Deployment
+
+#### Method 1: Docker on Render (Recommended)
+1. **Push to GitHub**: Ensure Dockerfile is in your repository
+2. **Create Render Account**: Go to [render.com](https://render.com)
+3. **New Web Service**: Click "New +" → "Web Service"
+4. **Connect Repository**: Select `frenzy2004/Brain-2`
+5. **Configure Deployment**:
+   - **Name**: `neurograde-pro`
+   - **Environment**: `Docker`
+   - **Dockerfile Path**: `./Dockerfile`
+   - **Instance Type**: `Starter` (minimum 2GB RAM) or higher
+6. **Deploy**: Click "Create Web Service"
+
+#### Method 2: Traditional Python Deployment
 1. Push to GitHub repository
 2. Connect to Render
 3. Deploy as web service
-4. Environment: Python 3.8+
-5. Build command: `pip install -r requirements.txt`
-6. Start command: `streamlit run app.py`
+4. **Configuration**:
+   - Environment: `Python 3.9`
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `streamlit run app.py --server.port=$PORT --server.address=0.0.0.0`
+   - Instance Type: **Standard** (4GB+ RAM required for AI model)
 
-### Docker Deployment
+### ☁️ Alternative Cloud Platforms
+
+#### Google Cloud Run
+```bash
+# Build and deploy to Google Cloud Run
+gcloud builds submit --tag gcr.io/PROJECT_ID/neurograde-pro
+gcloud run deploy --image gcr.io/PROJECT_ID/neurograde-pro --platform managed --memory 8Gi
+```
+
+#### AWS ECS/Fargate
+```bash
+# Push to AWS ECR and deploy on ECS
+aws ecr create-repository --repository-name neurograde-pro
+docker tag neurograde-pro:latest AWS_ACCOUNT.dkr.ecr.REGION.amazonaws.com/neurograde-pro:latest
+docker push AWS_ACCOUNT.dkr.ecr.REGION.amazonaws.com/neurograde-pro:latest
+```
+
+#### Heroku Container Registry
+```bash
+# Deploy to Heroku using containers
+heroku container:push web --app your-app-name
+heroku container:release web --app your-app-name
+```
+
+### 🔧 Production Configuration
+
+#### Resource Requirements
+- **Memory**: Minimum 4GB, Recommended 8GB+
+- **CPU**: 2+ cores recommended
+- **Storage**: 2GB for dependencies + model
+- **Network**: Standard bandwidth sufficient
+
+#### Environment Variables (Production)
+```env
+STREAMLIT_SERVER_PORT=8501
+STREAMLIT_SERVER_ADDRESS=0.0.0.0
+STREAMLIT_SERVER_HEADLESS=true
+STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+STREAMLIT_SERVER_ENABLE_CORS=false
+STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=true
+```
+
+#### Docker Production Optimization
 ```dockerfile
-FROM python:3.8-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8501
-CMD ["streamlit", "run", "app.py"]
+# Multi-stage build for smaller production image
+FROM python:3.9-slim as base
+# ... optimized build steps
+# Final image size: ~1.2GB (including TensorFlow + medical libraries)
 ```
 
 ## 🤝 Contributing
