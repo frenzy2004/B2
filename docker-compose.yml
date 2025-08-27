@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   neurograde-pro:
     build: .
@@ -10,20 +8,10 @@ services:
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
       - STREAMLIT_SERVER_HEADLESS=true
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
-    volumes:
-      # Optional: Mount local data directory for testing
-      # - ./sample_data:/app/sample_data:ro
     deploy:
       resources:
         limits:
-          # AI model needs significant memory
           memory: 8G
         reservations:
           memory: 4G
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
