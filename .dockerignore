@@ -47,14 +47,6 @@ temp/
 .tmp
 .temp
 
-# Sample data (users can download separately)
-Brain Sample Scan.zip
-*.nii
-*.nii.gz
-*.dcm
-sample_data/
-test_data/
-
 # Development files
 .env
 .env.local
@@ -75,5 +67,6 @@ dist/
 node_modules/
 npm-debug.log*
 
-# Keep the AI model - this is essential!
+# Keep essential files for the application
 !brain_tumor_unet_final.h5
+!Brain Sample Scan.zip

@@ -114,16 +114,19 @@ dmypy.json
 .streamlit/
 
 # Model files (if they're large)
-*.h5
+# *.h5  # Commented out to include our custom brain tumor model
 *.pkl
 *.joblib
 *.model
 
 # Data files
 *.csv
-*.nii
-*.nii.gz
+# *.nii      # Commented out to include sample brain scan data
+# *.nii.gz   # Commented out to include sample brain scan data  
 *.dcm
+
+# But keep the sample data
+!Brain Sample Scan.zip
 
 # IDE files
 .vscode/
