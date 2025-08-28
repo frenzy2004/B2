@@ -32,6 +32,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
+# Debug: List files to verify they're copied
+RUN ls -la /app/ && echo "=== Checking critical files ===" && ls -la /app/*.h5 /app/*.zip || echo "Critical files missing!"
+
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash neurograde && \
     chown -R neurograde:neurograde /app

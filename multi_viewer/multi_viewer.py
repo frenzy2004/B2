@@ -29,6 +29,31 @@ def load_nifti_from_uploaded_file(uploaded_file):
         st.error(f"Error loading {uploaded_file.name}: {str(e)}")
         return None
 
+def load_sample_scan_files():
+    """Load the sample brain scan files with different modalities"""
+    try:
+        scan_dir = "Brain MRI Sample Scan"
+        if not os.path.exists(scan_dir):
+            return None, None, None, None
+        
+        # Load different modalities
+        t1_path = os.path.join(scan_dir, "BraTS20_Training_004_t1.nii")
+        t2_path = os.path.join(scan_dir, "BraTS20_Training_004_t2.nii")
+        flair_path = os.path.join(scan_dir, "BraTS20_Training_004_flair.nii")
+        t1ce_path = os.path.join(scan_dir, "BraTS20_Training_004_t1ce.nii")
+        
+        # Load data
+        t1_data = nib.load(t1_path).get_fdata() if os.path.exists(t1_path) else None
+        t2_data = nib.load(t2_path).get_fdata() if os.path.exists(t2_path) else None
+        flair_data = nib.load(flair_path).get_fdata() if os.path.exists(flair_path) else None
+        t1ce_data = nib.load(t1ce_path).get_fdata() if os.path.exists(t1ce_path) else None
+        
+        return t1_data, t2_data, flair_data, t1ce_data
+        
+    except Exception as e:
+        st.error(f"Error loading sample scan files: {str(e)}")
+        return None, None, None, None
+
 def normalize_image(image):
     """Normalize image to 0-255 range"""
     if image.max() == image.min():
@@ -137,20 +162,27 @@ def multi_viewer_tab():
     st.header("🔬 Multi-Modality Viewer")
     st.write("View all MRI modalities simultaneously in a PACS-like layout with overlay controls.")
     
-    # Check if data exists in session state from main analysis
-    if 'mri_data' in st.session_state and st.session_state['mri_data'] is not None:
-        st.success("✅ Using MRI data from main analysis tab")
+    # Try to load sample scan files with different modalities first
+    t1_data, t2_data, flair_data, t1ce_data = load_sample_scan_files()
+    
+    if any([t1_data is not None, t2_data is not None, flair_data is not None, t1ce_data is not None]):
+        st.success("✅ Using sample brain scan data with different modalities")
+        segmentation_data = st.session_state.get('segmentation', None)
+        data_loaded = True
         
-        # Use data from session state
+    # Check if data exists in session state from main analysis as fallback
+    elif 'mri_data' in st.session_state and st.session_state['mri_data'] is not None:
+        st.warning("⚠️ Using single MRI data from main analysis tab (all modalities will look the same)")
+        
+        # Use data from session state as fallback
         mri_data = st.session_state['mri_data']
         segmentation_data = st.session_state.get('segmentation', None)
         
-        # For multi-viewer, we'll use the main MRI data as primary
-        # In real implementation, you'd have separate modalities
+        # Fallback: use the same data for all modalities
         t1_data = mri_data
-        t2_data = mri_data  # Placeholder - in real app these would be different
-        flair_data = mri_data  # Placeholder
-        t1ce_data = mri_data  # Placeholder
+        t2_data = mri_data
+        flair_data = mri_data
+        t1ce_data = mri_data
         
         data_loaded = True
         

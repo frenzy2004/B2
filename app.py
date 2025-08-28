@@ -472,12 +472,20 @@ def load_model():
 # ===================== REAL MRI DATASET LOADING =====================
 def load_real_brats_data():
     """Load REAL MRI data from the uploaded ZIP file"""
-    # Path to the uploaded zip file
-    demo_zip_path = "Brain Sample Scan.zip"  # Your zip filename
+    # Path to the uploaded zip file - handle both local and deployed environments
+    demo_zip_path = "Brain Sample Scan.zip"
+    
+    # For deployed environments, try absolute path
+    if not os.path.exists(demo_zip_path):
+        demo_zip_path = os.path.join(os.getcwd(), "Brain Sample Scan.zip")
     
     # Check if the ZIP file exists
     if not os.path.exists(demo_zip_path):
-        raise FileNotFoundError(f"ZIP file not found at {demo_zip_path}")
+        # List available files for debugging
+        current_files = os.listdir(".")
+        st.warning(f"Sample brain scan data not found. Available files: {current_files}")
+        st.info("💡 You can still upload your own MRI files to use the analysis features.")
+        return None, None, None  # Return None values instead of crashing
     
     # Create a temporary directory to extract the zip
     temp_dir = tempfile.mkdtemp()
